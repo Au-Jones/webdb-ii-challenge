@@ -48,8 +48,62 @@ server.get('/api/zoos/:id', (req, res) => {
 })
 
 server.post('/api/zoos', (req, res) => {
-  const
+  const zoo = req.body;
+  if(!req.body.name) {
+    res.status(400).json({
+      message: 'provide a name for the zoo '
+    })
+  }else{
+    db.insert(zoo)
+    .into('zoos')
+    .then(ids => {
+      req.status(201).json(ids[0])
+    })
+    .catch(error => {
+      req.status(500).json({message:'can not add zoo'})
+    })
+  }
 })
+
+server.put('/api/zoos/:id', (req, res) => {
+  db('zoos')
+  .where({id: req.params.id})
+  .update(req.body)
+  .then(count => {
+    if(count > 0) {
+      res.status(200).json({
+        message: 'zoo Updated'
+      })
+    }else{
+      res.status(404).json({
+        message: 'Zoo Not Found'
+      })
+    }
+  })
+  .catch(error => {
+    res.status(500).json({message: 'error updating'})
+  })
+})
+
+server.delete('/api/zoox/:id',(req, res) => {
+  db('zoos')
+  .where({id:req.params.id})
+  .delete()
+    .then(count => {
+      if (count > 0) {
+        res.status(200).json({
+          message: 'Deleted'
+        })
+      }else{
+        res.status(404).json({
+          message:'zoo not found'
+        })
+      }
+    })
+    .catch(error => {
+      res.status(500).json({message: ' could not remove zoo'})
+    })
+  })
 
 const port = 3300;
 server.listen(port, function() {
